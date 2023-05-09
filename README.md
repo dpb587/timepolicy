@@ -22,7 +22,7 @@ See [`timepolicy --help`](https://github.com/dpb587/timepolicy/blob/resources/re
 Binaries for Linux, macOS, and Windows can be downloaded from the [Releases](https://github.com/dpb587/timepolicy/releases/latest) page. A [Homebrew](https://brew.sh/) recipe is also available for Linux and macOS.
 
 ```
-brew install dpb587/timepolicy/latest
+brew install dpb587/tap/timepolicy
 ```
 
 ### Examples
