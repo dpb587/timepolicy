@@ -1,0 +1,160 @@
+name: release
+permissions:
+  contents: write
+on:
+  push:
+    tags:
+    - 'v*'
+jobs:
+  prepare:
+    name: prepare
+    runs-on: ubuntu-latest
+    outputs:
+      repository_url: ${{ steps.main.outputs.repository_url }}
+      version: ${{ steps.main.outputs.version }}
+      version_numbers: ${{ steps.main.outputs.version_numbers }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - name: checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - id: main
+      name: main
+      run: |
+        version=${GITHUB_REF#$"refs/tags/"}
+        version_numbers=${GITHUB_REF#$"refs/tags/v"}
+
+        if ! git merge-base --is-ancestor $( git rev-parse HEAD ) refs/remotes/origin/main
+        then
+          echo tag and main have diverged >&2
+          exit 1
+        fi
+
+        gh release create ${version} \
+          --draft \
+          --prerelease=false \
+          --title "${version}"
+
+        echo "repository_url=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" >> "$GITHUB_OUTPUT"
+        echo "version=${version}" >> "$GITHUB_OUTPUT"
+        echo "version_numbers=${version_numbers}" >> "$GITHUB_OUTPUT"
+  bundle:
+    name: bundle
+    runs-on: ubuntu-latest
+    needs:
+    - prepare
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - name: checkout
+      uses: actions/checkout@v3
+    - name: setup-go
+      uses: actions/setup-go@v4
+      with:
+        go-version: 1.20.4
+    - name: setup-rcodesign
+      env:
+        APPLE_APPLICATION_CERTIFICATE: ${{ secrets.APPLE_APPLICATION_CERTIFICATE }}
+        APPLE_APPLICATION_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_APPLICATION_CERTIFICATE_PASSWORD }}
+        APPLE_CONNECT_API_KEY: ${{ secrets.APPLE_CONNECT_API_KEY }}
+      run: |
+        mkdir /tmp/rcodesign
+        pushd /tmp/rcodesign
+        curl -fsSL -o rcodesign.tar.gz 'https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign%2F0.22.0/apple-codesign-0.22.0-x86_64-unknown-linux-musl.tar.gz'
+        echo "f6382c5e6e47bc4f6f02be2ad65a4fc5120b3df75aa520647abbadbae747fbcc  rcodesign.tar.gz" | sha256sum -c
+        tar xzvf rcodesign.tar.gz --strip-components=1
+        popd
+
+        base64 -d <<< "${APPLE_APPLICATION_CERTIFICATE}" > /tmp/apple-application-certificate
+        echo -n "${APPLE_APPLICATION_CERTIFICATE_PASSWORD}" > /tmp/apple-application-certificate-password
+        
+        base64 -d <<< "${APPLE_CONNECT_API_KEY}" > /tmp/apple-connect-api-key
+    - name: build
+      run: |
+        ./scripts/release/build.sh \
+          version="${{ needs.prepare.outputs.version }}"
+    - name: package
+      run: |
+        ./scripts/release/package.sh \
+          version="${{ needs.prepare.outputs.version }}"
+    - name: package-apple
+      run: |
+        export PATH="/tmp/rcodesign:${PATH}"
+        ./scripts/release/package-apple.sh \
+          version="${{ needs.prepare.outputs.version }}" \
+          apple-application-certificate-path=/tmp/apple-application-certificate \
+          apple-application-certificate-password-path=/tmp/apple-application-certificate-password \
+          apple-connect-api-key-path=/tmp/apple-connect-api-key
+    - name: sha256sum
+      run: |
+        pushd /tmp/timepolicy-release-workdir/assets
+        sha256sum * > sha256sum.txt
+        popd
+    - name: upload
+      run: |
+        gh release upload ${{ needs.prepare.outputs.version }} /tmp/timepolicy-release-workdir/assets/*
+    - name: resources-checkout
+      uses: actions/checkout@v3
+      with:
+        ref: resources
+        path: resources
+    - name: resources-metadata
+      run: |
+        pushd resources
+        mkdir -p release/${{ needs.prepare.outputs.version }}
+        cd release/${{ needs.prepare.outputs.version }}
+
+        echo -n ${{ needs.prepare.outputs.version }} > version
+        cp /tmp/timepolicy-release-workdir/assets/sha256sum.txt ./
+        cp /tmp/timepolicy-release-workdir/release.log ./
+
+        export COLUMNS=120
+        /tmp/timepolicy-release-workdir/targets/linux:amd64/root/timepolicy --help > timepolicy-help.txt
+        /tmp/timepolicy-release-workdir/targets/linux:amd64/root/timepolicy --version > timepolicy-version.txt
+
+        cd ..
+        [ ! -e latest ] || rm -fr latest
+        cp -rp ${{ needs.prepare.outputs.version }} latest
+
+        git add .
+    - name: resources-commit
+      uses: stefanzweifel/git-auto-commit-action@3ea6ae190baf489ba007f7c92608f33ce20ef04a
+      with:
+        commit_message: Release ${{ needs.prepare.outputs.version }}
+        repository: resources
+  publish:
+    name: publish
+    runs-on: ubuntu-latest
+    needs:
+    - prepare
+    - bundle
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - name: checkout
+      uses: actions/checkout@v3
+      with:
+        ref: resources
+    - name: publish
+      run: |
+        (
+          if [ -e release/${{ needs.prepare.outputs.version }}/changelog.md ]
+          then
+            cat release/${{ needs.prepare.outputs.version }}/changelog.md
+            echo
+          fi
+
+          echo -n 'Resources'
+          echo -n ': [sha256sum.txt](${{ needs.prepare.outputs.repository_url }}/blob/resources/release/${{ needs.prepare.outputs.version }}/sha256sum.txt)'
+          echo -n ', [`timepolicy --help`](${{ needs.prepare.outputs.repository_url }}/blob/resources/release/${{ needs.prepare.outputs.version }}/timepolicy-help.txt)'
+
+          echo
+        ) > notes.md
+
+        gh release edit ${{ needs.prepare.outputs.version }} \
+          --draft=false \
+          --notes-file=notes.md \
+          --latest
