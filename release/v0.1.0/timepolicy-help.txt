@@ -1,0 +1,60 @@
+Usage: timepolicy
+
+Select entries that match policies based on time and metadata.
+
+Flags:
+  -h, --help                      Show context-sensitive help.
+      --field-count=INT           Limit the number of fields extracted per entry.
+  -F, --field-separator=STRING    Separator used between fields. Value should be a regular expression (see
+                                  https://pkg.go.dev/regexp/syntax) or a supported alias (csv, spaces, tsv). Default is
+                                  spaces.
+  -i, --read-from=PATH            Read entries from file or path. Default is stdin.
+  -o, --write-to=PATH             Write selected entries to file or path. Default is stdout.
+      --write=FORMAT              Write selected entries in a custom format. A single field may be output using dollar +
+                                  field number, such as $1 for the first field.
+  -p, --policy=STRING...          One or more policies to evaluate entries against. See POLICY SPECIFICATIONS.
+      --invert                    Show entries which are not covered by any policy. Enables streaming mode and entries
+                                  may be written in a different order than they were read.
+      --time=STRING               Format used by the time field. Value should be a custom layout (see
+                                  https://pkg.go.dev/time#Layout) or a supported alias (ANSIC, UnixDate, RubyDate,
+                                  RFC822, RFC822Z, RFC850, RFC1123, RFC1123Z, RFC3339, RFC3339Nano, Stamp, StampMilli,
+                                  StampMicro, StampNano, Unix, UnixMilli, and YYYY-MM-DD). Default is RFC3339.
+      --time-field=INT            Field number containing the time, such as 1 for the first field.
+
+Global Flags
+  -q, --quiet      Suppress normal output.
+      --version    Show version.
+
+POLICY SPECIFICATIONS
+
+Policies evaluate entries based on (1) being within a Time Range and (2) Optional Qualifiers. An entry is selected while
+one or more policies apply to it.
+
+Time Range should be in the format of {INT}{unit}. Supported units are: s for seconds, h for hours, d for days, m for
+months, and y for years.
+
+Optional Qualifiers may be zero or more of the following:
+
+  - if={EXPR} - an expression that must be true for the entry to be considered (in addition to Time Range). Expressions
+    must evaluate to true or false. See ADVANCED EXPRESSIONS for details.
+  - by={EXPR} - a method to further segment matching entries. Simple values of year, month (year-month), day,
+    (year-month-day), and hour (year-month-day-hour) are supported; and ADVANCED EXPRESSIONS may be used for complex
+    strategies.
+  - oldest or newest - whether the policy prefers older or newer entries. By default, newest entries are preferred.
+  - max={INT} - limit the policy to apply to, at most, {INT} entries. By default, if no other qualifier is used,
+    a policy applies to all entries (max=-1); otherwise it defaults to a single entry (max=1).
+
+ADVANCED EXPRESSIONS
+
+For complex situations, use Common Expression Language (see https://github.com/google/cel-spec) for supported values.
+The following context is available:
+
+  - entry - raw input (string)
+  - ts - parsed timestamp from the entry
+  - fields - parsed field list from the entry (strings)
+
+EXIT STATUS
+
+  - 0 - one or more entries were selected
+  - 1 - no entries were selected
+  - >1 - a general error occurred

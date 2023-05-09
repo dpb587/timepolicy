@@ -1,0 +1,5 @@
+62414f15b48eee7d25474169859279274df0d996ab2b03b6ec25f5008fbfa062  timepolicy-v0.1.0-darwin-amd64.zip
+c7415ddf3b87f1b8a0cd4c729b1b51f60297ae315407ae2bdd061cd7617153fd  timepolicy-v0.1.0-darwin-arm64.zip
+eae42c5963e68c048fccbebcf09288fb8919ce9886aab15f1199a5144f79e5ff  timepolicy-v0.1.0-linux-amd64.tar.gz
+242537888707333a38e6c14b7dfc9cac8b8b4abaedc6e7c5b8564b123ac1d6a5  timepolicy-v0.1.0-linux-arm64.tar.gz
+4a323f50894e2cf94a863390aa35f4f8e98a1c9fab215d7f991ec97211db4db2  timepolicy-v0.1.0-windows-amd64.zip

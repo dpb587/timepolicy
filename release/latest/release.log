@@ -1,0 +1,152 @@
+[2023-05-09T00:23:15Z] ==> ./scripts/release/build.sh
+[2023-05-09T00:23:15Z] --> workdir /tmp/timepolicy-release-workdir
+[2023-05-09T00:23:15Z] --> version v0.1.0
+[2023-05-09T00:23:15Z] --> targets darwin:amd64 darwin:arm64 linux:amd64 linux:arm64 windows:amd64
+[2023-05-09T00:23:15Z] build/properties: commit=2bd9b9e60c clean=true time=2023-05-09T00:23:15Z
+[2023-05-09T00:23:15Z] build/cmd: os=darwin arch=amd64 cmd=timepolicy
+[2023-05-09T00:23:16Z] build/cmd: os=darwin arch=arm64 cmd=timepolicy
+[2023-05-09T00:23:17Z] build/cmd: os=linux arch=amd64 cmd=timepolicy
+[2023-05-09T00:23:17Z] build/cmd: os=linux arch=arm64 cmd=timepolicy
+[2023-05-09T00:23:18Z] build/cmd: os=windows arch=amd64 cmd=timepolicy
+[2023-05-09T00:23:18Z] ==> ./scripts/release/package.sh
+[2023-05-09T00:23:18Z] --> workdir /tmp/timepolicy-release-workdir
+[2023-05-09T00:23:18Z] --> version v0.1.0
+[2023-05-09T00:23:18Z] --> targets darwin:amd64 darwin:arm64 linux:amd64 linux:arm64 windows:amd64
+[2023-05-09T00:23:18Z] package: os=darwin arch=amd64
+  adding: LICENSE (deflated 40%)
+  adding: LICENSES (deflated 82%)
+  adding: timepolicy (deflated 69%)
+[2023-05-09T00:23:21Z] package: os=darwin arch=arm64
+  adding: LICENSE (deflated 40%)
+  adding: LICENSES (deflated 82%)
+  adding: timepolicy (deflated 70%)
+[2023-05-09T00:23:22Z] package: os=linux arch=amd64
+[2023-05-09T00:23:24Z] package: os=linux arch=arm64
+[2023-05-09T00:23:26Z] package: os=windows arch=amd64
+  adding: LICENSE (deflated 40%)
+  adding: LICENSES (deflated 82%)
+  adding: timepolicy.exe (deflated 67%)
+[2023-05-09T00:23:28Z] ==> ./scripts/release/package-apple.sh
+[2023-05-09T00:23:28Z] --> workdir /tmp/timepolicy-release-workdir
+[2023-05-09T00:23:28Z] --> version v0.1.0
+[2023-05-09T00:23:28Z] --> targets darwin:amd64 darwin:arm64 linux:amd64 linux:arm64 windows:amd64
+[2023-05-09T00:23:28Z] package-apple/sign: os=darwin arch=amd64 cmd=timepolicy
+registering signing key
+automatically registered Apple CA certificate: Developer ID Certification Authority
+automatically registered Apple CA certificate: Apple Root CA
+using time-stamp protocol server http://timestamp.apple.com/ts01
+automatically setting team ID from signing certificate: F3S7N9C63N
+signing timepolicy in place
+signing timepolicy as a Mach-O binary
+inferring default signing settings from Mach-O binary
+setting binary identifier to timepolicy
+parsing Mach-O
+signing Mach-O binary at index 0
+attempting to derive code requirements from signing certificate
+code requirements: 0: (identifier "timepolicy") and ((anchor apple generic) and ((certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */) and ((certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */) and (certificate leaf[subject.OU] = "F3S7N9C63N"))));
+binary targets macOS >= 10.13.0 with SDK 10.13.0
+adding code signature flags from signing settings: RUNTIME
+using hardened runtime version 10.13.0 derived from SDK version
+code directory version: 132352
+creating cryptographic signature with certificate Developer ID Application: Danny Berger (F3S7N9C63N)
+Using time-stamp server http://timestamp.apple.com/ts01
+total signature size: 86749 bytes
+writing Mach-O to timepolicy
+  adding: LICENSE (deflated 40%)
+  adding: LICENSES (deflated 82%)
+  adding: timepolicy (deflated 69%)
+[2023-05-09T00:23:31Z] package-apple/notarize: os=darwin arch=amd64
+creating Notary API submission for timepolicy-v0.1.0-darwin-amd64.zip (sha256: 62414f15b48eee7d25474169859279274df0d996ab2b03b6ec25f5008fbfa062)
+created submission ID: 9f2a5a7f-7438-48c6-aab7-0085dcb01045
+resolving AWS S3 configuration from Apple-provided credentials
+uploading asset to s3://notary-submissions-prod/prod/AROARQRX7CZS3PRF6ZA5L:9f2a5a7f-7438-48c6-aab7-0085dcb01045
+(you may see additional log output from S3 client)
+S3 upload completed successfully
+waiting up to 600s for package upload 9f2a5a7f-7438-48c6-aab7-0085dcb01045 to finish processing
+poll state after 0s: InProgress
+poll state after 3s: InProgress
+poll state after 7s: InProgress
+poll state after 10s: InProgress
+poll state after 13s: Accepted
+Notary API Server has finished processing the uploaded asset
+fetching notarization log for 9f2a5a7f-7438-48c6-aab7-0085dcb01045
+notary log> {
+notary log>   "archiveFilename": "timepolicy-v0.1.0-darwin-amd64.zip",
+notary log>   "issues": null,
+notary log>   "jobId": "9f2a5a7f-7438-48c6-aab7-0085dcb01045",
+notary log>   "logFormatVersion": 1,
+notary log>   "sha256": "62414f15b48eee7d25474169859279274df0d996ab2b03b6ec25f5008fbfa062",
+notary log>   "status": "Accepted",
+notary log>   "statusCode": 0,
+notary log>   "statusSummary": "Ready for distribution",
+notary log>   "ticketContents": [
+notary log>     {
+notary log>       "arch": "x86_64",
+notary log>       "cdhash": "bf73ded87f4b8e462036ed7dcab9f9faac17d206",
+notary log>       "digestAlgorithm": "SHA-256",
+notary log>       "path": "timepolicy-v0.1.0-darwin-amd64.zip/timepolicy"
+notary log>     }
+notary log>   ],
+notary log>   "uploadDate": "2023-05-09T00:23:33.162Z"
+notary log> }
+[2023-05-09T00:23:47Z] package-apple/sign: os=darwin arch=arm64 cmd=timepolicy
+registering signing key
+automatically registered Apple CA certificate: Developer ID Certification Authority
+automatically registered Apple CA certificate: Apple Root CA
+using time-stamp protocol server http://timestamp.apple.com/ts01
+automatically setting team ID from signing certificate: F3S7N9C63N
+signing timepolicy in place
+signing timepolicy as a Mach-O binary
+inferring default signing settings from Mach-O binary
+preserving existing binary identifier in Mach-O
+using team ID from settings
+using code signature flags from settings
+setting binary identifier to timepolicy
+parsing Mach-O
+signing Mach-O binary at index 0
+attempting to derive code requirements from signing certificate
+code requirements: 0: (identifier "a.out") and ((anchor apple generic) and ((certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */) and ((certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */) and (certificate leaf[subject.OU] = "F3S7N9C63N"))));
+binary targets macOS >= 11.0.0 with SDK 11.0.0
+adding code signature flags from signing settings: RUNTIME
+using hardened runtime version 11.0.0 derived from SDK version
+code directory version: 132352
+creating cryptographic signature with certificate Developer ID Application: Danny Berger (F3S7N9C63N)
+Using time-stamp server http://timestamp.apple.com/ts01
+total signature size: 86355 bytes
+writing Mach-O to timepolicy
+  adding: LICENSE (deflated 40%)
+  adding: LICENSES (deflated 82%)
+  adding: timepolicy (deflated 70%)
+[2023-05-09T00:23:50Z] package-apple/notarize: os=darwin arch=arm64
+creating Notary API submission for timepolicy-v0.1.0-darwin-arm64.zip (sha256: c7415ddf3b87f1b8a0cd4c729b1b51f60297ae315407ae2bdd061cd7617153fd)
+created submission ID: 891a4cc7-ff3a-469f-a6a1-612c9b8aad25
+resolving AWS S3 configuration from Apple-provided credentials
+uploading asset to s3://notary-submissions-prod/prod/AROARQRX7CZS3PRF6ZA5L:891a4cc7-ff3a-469f-a6a1-612c9b8aad25
+(you may see additional log output from S3 client)
+S3 upload completed successfully
+waiting up to 600s for package upload 891a4cc7-ff3a-469f-a6a1-612c9b8aad25 to finish processing
+poll state after 4s: InProgress
+poll state after 8s: InProgress
+poll state after 11s: InProgress
+poll state after 14s: Accepted
+Notary API Server has finished processing the uploaded asset
+fetching notarization log for 891a4cc7-ff3a-469f-a6a1-612c9b8aad25
+notary log> {
+notary log>   "archiveFilename": "timepolicy-v0.1.0-darwin-arm64.zip",
+notary log>   "issues": null,
+notary log>   "jobId": "891a4cc7-ff3a-469f-a6a1-612c9b8aad25",
+notary log>   "logFormatVersion": 1,
+notary log>   "sha256": "c7415ddf3b87f1b8a0cd4c729b1b51f60297ae315407ae2bdd061cd7617153fd",
+notary log>   "status": "Accepted",
+notary log>   "statusCode": 0,
+notary log>   "statusSummary": "Ready for distribution",
+notary log>   "ticketContents": [
+notary log>     {
+notary log>       "arch": "arm64",
+notary log>       "cdhash": "6c9d31daa82885d67655ebbca8a2a897c2c80af5",
+notary log>       "digestAlgorithm": "SHA-256",
+notary log>       "path": "timepolicy-v0.1.0-darwin-arm64.zip/timepolicy"
+notary log>     }
+notary log>   ],
+notary log>   "uploadDate": "2023-05-09T00:23:51.539Z"
+notary log> }
